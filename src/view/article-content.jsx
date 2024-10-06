@@ -1,0 +1,41 @@
+import { FillingQuizView } from "./filling-quiz-view";
+import { SelectionQuizView } from "./selection-quiz-view";
+
+export default function ArticleContent({ article, elRefs }) {
+  const children = article.content.map((p, i) => (
+    <p key={`p-${i}`}>
+      {p.flatMap((e) => {
+        switch (e.kind) {
+          case "text":
+            return e.text;
+          case "quiz":
+            const index = e.index;
+            const quiz = article.quizes[index];
+            let Clazz;
+            switch (quiz.kind) {
+              case "fill":
+                Clazz = FillingQuizView;
+                break;
+              case "selection":
+                Clazz = SelectionQuizView;
+                break;
+              default:
+                return <span className="error">Unknown Quiz</span>;
+            }
+            return [
+              " ",
+              <Clazz
+                active={article.currentIndex === index}
+                holder={article.quizHolderAt(index)}
+                onFocused={() => article.setCurrentIndex(index)}
+                key={`quiz-${index}`}
+                innerRef={elRefs[index]}
+              />,
+              " ",
+            ];
+        }
+      })}
+    </p>
+  ));
+  return <>{children}</>
+}

@@ -1,0 +1,93 @@
+.App {
+  font-family: sans-serif;
+  text-align: center;
+}
+
+html {
+  virtual-keyboard: overlays-content;
+}
+
+@media (prefers-color-scheme: light) {
+  body,
+  .layer {
+    background-color: white;
+    color: black;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  body,
+  .layer {
+    background-color: black;
+    color: white;
+  }
+}
+
+.space {
+  display: inline;
+  word-wrap: break-word;
+  text-decoration: underline;
+  text-decoration-color: gray;
+  white-space: break-spaces;
+  border: dashed 1pt #00000022;
+  border-radius: 3pt;
+  outline: none;
+}
+
+.space br {
+  display: none;
+}
+
+.space:focus,
+.space.active {
+  text-decoration-color: var(--mantine-primary-color-filled);
+}
+
+.space.wrong {
+  background-color: #ff000033;
+  border-color: #ff000066;
+}
+
+.space.right {
+  background-color: #00ff0033;
+  border-color: #00ff0066;
+}
+
+.space::before {
+  content: attr(data-pre);
+}
+
+.space::after {
+  content: attr(data-post);
+}
+
+main {
+  margin-top: 60px;
+  margin-bottom: 120px;
+  padding: 10px;
+}
+
+header {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  padding: 10px;
+  border-bottom: 1px solid #00000011;
+}
+
+footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 10px;
+  border-top: 1px solid #00000011;
+  margin-bottom: calc(env(keyboard-inset-height));
+}
+
+@media (pointer: none), (pointer: coarse) {
+  iframe {
+    display: none;
+  }
+}
