@@ -4,7 +4,8 @@ import { QuizHolder, QuizState } from "./quiz"
 export default class ArticleHolder {
   constructor(article) {
     this._article = article;
-    this._content = contentOf(article);
+    this._content = React.useMemo(
+      () => contentOf(article), [article]);
     [this.currentIndex, this.setCurrentIndex] = React.useState(0);
     [this.quizStates, this._setQuizStates] = React.useState(
       article.quizes.map(QuizState.create));

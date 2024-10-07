@@ -2,7 +2,7 @@ import React from "react";
 import classNames from "classnames";
 import { Button } from "@mantine/core";
 import ContentEditable from "./react-contenteditable";
-import { wtfLength, spaceHolderChar } from "../utils";
+import U from "../utils";
 import { QuizStatus } from "../viewmodel/quiz";
 
 const maxSpaces = 10;
@@ -14,7 +14,7 @@ export function FillingQuizView({
   innerRef,
 }) {
   const contentEditable = React.createRef();
-  const spaces = Math.max(maxSpaces - wtfLength(holder.state.value), 0);
+  const spaces = Math.max(maxSpaces - U.wtfLength(holder.state.value), 0);
 
   function handleTextChange(e) {
     if (e.target.value.includes("\n")) {
@@ -50,8 +50,8 @@ export function FillingQuizView({
         right: holder.state.status === QuizStatus.right,
       })}
       enterKeyHint="done"
-      data-pre={spaceHolderChar.repeat(Math.floor(spaces / 2))}
-      data-post={spaceHolderChar.repeat(Math.ceil(spaces / 2))}
+      data-pre={U.spaceHolderChar.repeat(Math.floor(spaces / 2))}
+      data-post={U.spaceHolderChar.repeat(Math.ceil(spaces / 2))}
     />
   );
 }
