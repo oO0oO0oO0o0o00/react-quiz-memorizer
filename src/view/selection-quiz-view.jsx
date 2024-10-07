@@ -2,7 +2,7 @@ import classNames from "classnames";
 import { Button, ActionIcon, Flex } from "@mantine/core";
 import { IconBackspace } from "@tabler/icons-react";
 import { IconCheck } from "@tabler/icons-react";
-import { wtfPad } from "../utils";
+import U from "../utils";
 import { QuizStatus } from "../viewmodel/quiz";
 
 export function SelectionQuizView({
@@ -25,7 +25,7 @@ export function SelectionQuizView({
       onFocus={() => onFocused()}
       ref={innerRef}
     >
-      {wtfPad(text, 10)}
+      {U.wtfPad(text, 10)}
     </span>
   );
 }

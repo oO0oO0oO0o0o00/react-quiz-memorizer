@@ -7,20 +7,15 @@ import ArticleHolder from "../viewmodel/article";
 import { QuizStatus } from "../viewmodel/quiz";
 import { MistakeOptionsBar, FinishedOptionsBar } from "../view/finish-option-bars";
 import { FillingQuizOptionsBar } from "./filling-quiz-view";
+import U from "../utils";
 const logo = require("../images/cat.jpg");
 
 export default function QuizPage({ articleData, onFinish }) {
-  const article = new ArticleHolder(
-    articleData);
-  const [elRefs, setElRefs] = React.useState([]);
+  const article = new ArticleHolder(articleData);
+  const elRefs = React.useRef([]);
 
   React.useEffect(() => {
-    // add or remove refs
-    setElRefs((elRefs) =>
-      Array(article.quizes.length)
-        .fill()
-        .map((_, i) => elRefs[i] || React.createRef())
-    );
+    elRefs.current = U.shrink(elRefs.current, article.quizes.length);
   }, [article.quizes.length]);
 
   React.useEffect(() => {
@@ -35,7 +30,7 @@ export default function QuizPage({ articleData, onFinish }) {
   ]);
 
   function focusQuiz(index) {
-    const el = elRefs[index]?.current;
+    const el = elRefs.current[index];
     if (el) {
       el.scrollIntoView();
       el.scrollIntoView({ block: "center" });

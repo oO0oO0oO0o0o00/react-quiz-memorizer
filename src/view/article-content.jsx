@@ -29,7 +29,7 @@ export default function ArticleContent({ article, elRefs }) {
                 holder={article.quizHolderAt(index)}
                 onFocused={() => article.setCurrentIndex(index)}
                 key={`quiz-${index}`}
-                innerRef={elRefs[index]}
+                innerRef={(x) => elRefs.current[index] = x}
               />,
               " ",
             ];
