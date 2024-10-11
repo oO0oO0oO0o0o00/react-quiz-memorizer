@@ -1,18 +1,28 @@
 import React from "react";
-import { QuizHolder, QuizState } from "./quiz"
+import _ from 'underscore';
+import { QuizHolder, QuizState, QuizStatus } from "./quiz"
 
 export default class ArticleHolder {
-  constructor(article) {
+  constructor({ 
+    article,
+    currentIndex,
+    setCurrentIndex,
+    quizStates,
+    setQuizStates,
+    scoreHolder,
+  }) {
     this._article = article;
     this._content = React.useMemo(
       () => contentOf(article), [article]);
-    [this.currentIndex, this.setCurrentIndex] = React.useState(0);
-    [this.quizStates, this._setQuizStates] = React.useState(
-      article.quizes.map(QuizState.create));
+    this.currentIndex = currentIndex;
+    this.setCurrentIndex = setCurrentIndex;
+    this.quizStates = quizStates;
+    this._setQuizStates = setQuizStates;
+    this.scoreHolder = scoreHolder;
   }
 
-  get quizes() {
-    return this._article.quizes;
+  get quizzes() {
+    return this._article.quizzes;
   }
 
   get content() {
@@ -23,8 +33,12 @@ export default class ArticleHolder {
     return this._article.title;
   }
 
+  get icon() {
+    return this._article.icon;
+  }
+
   get currentQuiz() {
-    return this._article.quizes[this.currentIndex];
+    return this._article.quizzes[this.currentIndex];
   }
 
   get currentQuizState() {
@@ -33,13 +47,20 @@ export default class ArticleHolder {
 
   quizHolderAt(index) {
     return QuizHolder.create(
-      this._article.quizes[index], // quiz
+      this._article.quizzes[index], // quiz
       this.quizStates[index], // state
       ({ value, status }) => { // setState
         let newQuizStates = [...this.quizStates];
         let state = newQuizStates[index];
         state.value = value ?? state.value;
         state.status = status ?? state.status;
+        if (state.score == null) {
+          if (status == QuizStatus.right) {
+            state.score = true;
+          } else if(status == QuizStatus.wrong) {
+            state.score = false;
+          }
+        }
         this._setQuizStates(newQuizStates);
       },
       () => { // goNext
@@ -51,9 +72,24 @@ export default class ArticleHolder {
   get currentQuizHolder() {
     return this.quizHolderAt(this.currentIndex);
   }
+
+  skip() {
+    this._setQuizStates(_.zip(
+      this._article.quizzes,
+      this.quizStates,
+      Array.from(this.quizStates.keys())
+    ).map(([quiz, state, index]) => {
+      if (this.currentIndex > index) { return state; }
+      state.value = quiz.answer;
+      state.status = QuizStatus.final;
+      return state;
+    }));
+    this.setCurrentIndex(this.quizStates.length);
+  }
 }
 
 function contentOf(article) {
+  if (!article) { return null; }
   let paragraphs = [];
   let paragraph = [];
   let text = "";

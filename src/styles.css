@@ -61,6 +61,16 @@ html {
   content: attr(data-post);
 }
 
+[type=button].lite {
+  color: var(--mantine-color-default-color);
+}
+
+[type=button].lite:disabled,
+[type=button].lite[data-disabled] {
+  background-color: transparent;
+  opacity: 0.16;
+}
+
 main {
   margin-top: 60px;
   margin-bottom: 120px;
@@ -72,6 +82,9 @@ header {
   left: 0;
   right: 0;
   top: 0;
+}
+
+header .main {
   padding: 10px;
   border-bottom: 1px solid #00000011;
 }

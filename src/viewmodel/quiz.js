@@ -5,12 +5,14 @@ export class QuizStatus {
   static wrong = false;
   static right = true;
   static taught = 233;
+  static final = 1;
 }
 
 export class QuizState {
   constructor() {
     this.status = QuizStatus.none;
-    this.value = this.constructor.initalValue;
+    this.value = this.constructor.initialValue;
+    this.score = null;
   }
 
   static create(quiz) {
@@ -26,11 +28,11 @@ export class QuizState {
 }
 
 export class FillingQuizState extends QuizState {
-  static get initalValue() { return "" }
+  static get initialValue() { return "" }
 }
 
 export class SelectionQuizState extends QuizState {
-  static get initalValue() { return [] }
+  static get initialValue() { return [] }
 }
 
 export class QuizHolder {
@@ -60,7 +62,7 @@ export class QuizHolder {
 
   reset() {
     this.setState({ 
-      value: this.state.constructor.initalValue,
+      value: this.state.constructor.initialValue,
       status: QuizStatus.none,
     })
   }
@@ -73,7 +75,7 @@ export class QuizHolder {
   }
 
   goNext() {
-    this.setState({ status: QuizStatus.none });
+    this.setState({ status: QuizStatus.final });
     this._goNext();
   }
 }

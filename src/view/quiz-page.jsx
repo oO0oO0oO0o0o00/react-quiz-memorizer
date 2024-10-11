@@ -1,31 +1,29 @@
 import React from "react";
-import { Group, Image, Center } from "@mantine/core";
-import { IconArrowLeft, IconDots } from "@tabler/icons-react";
+import { Group, Image, Center, Button, Menu, Progress, rem } from "@mantine/core";
+import { IconArrowLeft, IconDots, IconChevronLeft, IconChevronRight, IconPlayerSkipForward } from "@tabler/icons-react";
 import ArticleContent from "../view/article-content"
 import { SelectionQuizOptionsBar } from "../view/selection-quiz-view"
-import ArticleHolder from "../viewmodel/article";
 import { QuizStatus } from "../viewmodel/quiz";
-import { MistakeOptionsBar, FinishedOptionsBar } from "../view/finish-option-bars";
+import { MistakeOptionsBar, FinishedOptionsBar, NextPageOptionsBar } from "../view/finish-option-bars";
 import { FillingQuizOptionsBar } from "./filling-quiz-view";
 import U from "../utils";
-const logo = require("../images/cat.jpg");
 
-export default function QuizPage({ articleData, onFinish }) {
-  const article = new ArticleHolder(articleData);
+export default function QuizPage({ article, navigation }) {
   const elRefs = React.useRef([]);
 
+  // Shrink DOM array
   React.useEffect(() => {
-    elRefs.current = U.shrink(elRefs.current, article.quizes.length);
-  }, [article.quizes.length]);
+    elRefs.current = U.shrink(elRefs.current, article.quizzes.length);
+  }, [article.quizzes.length]);
 
+  // Quiz & page switching
   React.useEffect(() => {
-    if (article.currentIndex == article.quizes.length) {
-      onFinish();
-    } else {
+    if (article.currentIndex < article.quizzes.length) {
       focusQuiz(article.currentIndex);
     }
   }, [
-    article.currentIndex, 
+    article,
+    article.currentIndex,
     article.quizStates[article.currentIndex]?.status,
   ]);
 
@@ -36,6 +34,11 @@ export default function QuizPage({ articleData, onFinish }) {
       el.scrollIntoView({ block: "center" });
       el.focus();
     }
+  }
+
+  function handleSkip() {
+    article.skip();
+    navigation.goNext();
   }
 
   const optionsBar = (() => {
@@ -61,32 +64,52 @@ export default function QuizPage({ articleData, onFinish }) {
         }
         break;
       default:
-        return null;
+        return <NextPageOptionsBar onClick={() => navigation.goNext()}/>;
     }
-    return (
-      <Clazz holder={article.currentQuizHolder} />
-    );
+    return <Clazz holder={article.currentQuizHolder} />;
   })();
 
   return (
     <>
       <header className="layer">
-        <Group justify="space-between" h="100%">
+        <Group className="main" justify="space-between" h="100%">
           <IconArrowLeft stroke={1.2} />
-          <div>{article.title}</div>
-          <IconDots stroke={1.2} />
+          {/* <div>{article.title}</div> */}
+          <Button className="lite" size="xs" variant="transparent" disabled={!navigation.hasPrev} onClick={() => navigation.goPrev()}>
+            <IconChevronLeft size={20} stroke={1.5} />
+          </Button>
+          <Button className="lite" size="xs" variant="transparent" disabled={!navigation.hasNext} onClick={() => navigation.goNext()}>
+            <IconChevronRight size={20} stroke={1.5} />
+          </Button>
+          <Menu width={150}>
+            <Menu.Target>
+              <Button className="lite" size="xs" variant="transparent">
+                <IconDots stroke={1.2} />
+              </Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item
+                leftSection={<IconPlayerSkipForward style={{ width: rem(14), height: rem(14) }} />}
+                onClick={() => handleSkip()}>
+                Skip
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
         </Group>
+        <Progress size="xs" radius={null}
+          value={article.scoreHolder.progress * 100 / article.scoreHolder.total} />
       </header>
       <main>
+        {article.icon ? 
         <Center>
           <Image
             radius="md"
             h={{ base: 200, xs: 100 }}
-            src={String(logo)}
+            src={`/images/${article.icon}`}
             w="auto"
             fit="contain"
           />
-        </Center>
+        </Center> : null}
         <ArticleContent article={article} elRefs={elRefs} />
       </main>
       {optionsBar == null ? null : (

@@ -72,8 +72,7 @@ export function SelectionQuizOptionsBar({ holder }) {
                 <ActionIcon aria-label="confirm" size="input-xs" key="confirm" onClick={() => holder.judge()}>
                   <IconCheck style={{ width: "70%", height: "70%" }} stroke={1.5} />
                 </ActionIcon>,
-              ]
-            : []
+              ] : []
         )}
     </Flex>
   );

@@ -91,6 +91,11 @@ export default class ContentEditable extends React.Component<Props> {
       return true;
     }
 
+    if (!this.state.composing &&
+      strip(el.innerText) != nextProps.text) { 
+        return true; 
+      }
+
     // Handle additional properties
     return (
       props.disabled !== nextProps.disabled ||
@@ -129,7 +134,7 @@ export default class ContentEditable extends React.Component<Props> {
     el.setAttribute("data-post", this.props['data-post']);
 
     if (this.props.onChange && stripped !== this.lastText) {
-      console.log(`🐱 emitChange(${stripped})`);
+      // console.log(`🐱 emitChange(${stripped})`);
       const evt = Object.assign({}, originalEvt, {
         target: {
           value: stripped,

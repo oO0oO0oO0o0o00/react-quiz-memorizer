@@ -1,4 +1,7 @@
+import _ from 'underscore';
+
 const spaceHolderChar = "\u2002";
+
 export default class U {
   static get spaceHolderChar() { 
     return spaceHolderChar;
@@ -23,5 +26,15 @@ export default class U {
     } else { 
       return arr;
     }
+  }
+
+  static mutateWithCopy(arr, index, value) {
+    const newArr = [...arr];
+    newArr[index] = value;
+    return newArr;
+  }
+
+  static withIndex(arr) {
+    return _.zip(arr, Array.from(arr.keys()));
   }
 }

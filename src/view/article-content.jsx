@@ -10,7 +10,7 @@ export default function ArticleContent({ article, elRefs }) {
             return e.text;
           case "quiz":
             const index = e.index;
-            const quiz = article.quizes[index];
+            const quiz = article.quizzes[index];
             let Clazz;
             switch (quiz.kind) {
               case "fill":
