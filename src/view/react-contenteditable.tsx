@@ -161,6 +161,7 @@ export interface Props extends DivProps {
   tagName?: string;
   className?: string;
   style?: Object;
+  placeholder?: string;
   innerRef?: React.RefObject<HTMLElement> | Function;
   "data-pre": string,
   "data-post": string,
