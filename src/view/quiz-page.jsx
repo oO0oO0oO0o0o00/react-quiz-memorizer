@@ -8,7 +8,8 @@ import { MistakeOptionsBar, FinishedOptionsBar, NextPageOptionsBar } from "../vi
 import { FillingQuizOptionsBar } from "./filling-quiz-view";
 import U from "../utils";
 
-export default function QuizPage({ article, navigation }) {
+export default function QuizPage({ createArticle, navigation }) {
+  const article = createArticle();
   const elRefs = React.useRef([]);
 
   // Shrink DOM array
@@ -97,7 +98,7 @@ export default function QuizPage({ article, navigation }) {
           </Menu>
         </Group>
         <Progress size="xs" radius={null}
-          value={article.scoreHolder.progress * 100 / article.scoreHolder.total} />
+          value={article.progress * 100} />
       </header>
       <main>
         {article.icon ? 

@@ -9,7 +9,7 @@ export default class ArticleHolder {
     setCurrentIndex,
     quizStates,
     setQuizStates,
-    scoreHolder,
+    progress,
   }) {
     this._article = article;
     this._content = React.useMemo(
@@ -18,7 +18,7 @@ export default class ArticleHolder {
     this.setCurrentIndex = setCurrentIndex;
     this.quizStates = quizStates;
     this._setQuizStates = setQuizStates;
-    this.scoreHolder = scoreHolder;
+    this.progress = progress;
   }
 
   get quizzes() {

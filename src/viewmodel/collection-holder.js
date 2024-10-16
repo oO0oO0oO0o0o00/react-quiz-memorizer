@@ -1,27 +1,30 @@
 import React from "react";
 import U from "../utils";
 import { QuizState, QuizStatus } from "./quiz";
+import ArticleHolder from "./article";
 
 export default class CollectionHolder {
     constructor({
-        collection
+        id, collection, numPages,
     }) {
         this.collection = collection;
+        this.numPages = numPages;
         [this.progressPage, this._setProgressPage] = React.useState(0);
         [this.page, this._setPage] = React.useState(0);
         [this.quizIndexes, this._setQuizIndexes] = React.useState(
-            () => Array(collection.length).fill(0));
-        this.totalScore = React.useMemo(
-          () => collection.reduce((s, e) => s + e.quizzes.length, 0),
-          [collection]);
-        [this.currentPageState, this._setCurrentPageState] = React.useState(
-            () => collection[this.page].quizzes.map(QuizState.create));
+            () => Array(numPages).fill(0));
+            [this.currentPageState, this._setCurrentPageState] = React.useState(
+                () => collection[this.page].quizzes.map(QuizState.create));
         this.pageStates = React.useMemo(
             () => {
-                const arr = Array(collection.length);
+                const arr = Array(numPages);
                 arr[this.page] = this.currentPageState;
                 return arr;
             }, [collection]);
+        this.totalScore = React.useMemo(
+          () => this.page == this.numPages ?
+            this.pageStates.reduce((s, e) => s + e?.length ?? 0, 0) : 0,
+          [id, this.page]);
         this.score = React.useMemo(() => {
             return this.pageStates.reduce((s, e) => {
                 return s + (e?.reduce((s, e) => {
@@ -30,15 +33,12 @@ export default class CollectionHolder {
             }, 0);
         }, [this.currentPageState]);
         this.progress = React.useMemo(() => {
-            let x= this.pageStates.reduce((s, e) => {
-                let y= s + (e?.reduce((s, e) => {
-                    return s + (e?.status == QuizStatus.final ? 1 : 0);
-                }, 0) ?? 0);
-                console.log({y});
-                return y;
-            }, 0);
-            console.log({x, s: JSON.stringify(this.pageStates)});
-            return x;
+            const pageWeight = 1 / numPages;
+            const pageProgress = ((this.currentPageState?.length ?? 0) > 0) ?
+                (this.currentPageState.reduce(
+                    (s, e) => s + (e.status == QuizStatus.final ? 1 : 0), 0)
+                    / this.currentPageState.length) : 0;
+            return pageWeight * (this.progressPage + pageProgress);
         }, [this.currentPageState]);
     }
     
@@ -48,7 +48,7 @@ export default class CollectionHolder {
 
     setCurrentPageState(state) {
         this._setCurrentPageState(state);
-        if (this.page <= this.collection.length) {
+        if (this.page <= this.numPages) {
             this.pageStates[this.page] = state;
         }
     }
@@ -56,7 +56,7 @@ export default class CollectionHolder {
     switchPage(newPage) {
       this._setPage(newPage);
       this.pageStates[this.page] = this.currentPageState;
-      if (newPage >= this.collection.length) {
+      if (newPage >= this.numPages) {
         this._setCurrentPageState(null);
         return;
       }
@@ -64,10 +64,6 @@ export default class CollectionHolder {
       if (this.progressPage < newPage) {
         this._setProgressPage(newPage);
       }
-    }
-
-    get currentArticle() {
-        return this.collection[this.page];
     }
 
     get currentQuizIndex() {
@@ -80,5 +76,16 @@ export default class CollectionHolder {
         if (index >= this.currentPageState.length) {
             this.switchPage(this.page + 1);
         }
+    }
+
+    get articleHolder() {
+        return new ArticleHolder({
+            article: this.collection[this.page],
+            currentIndex: this.currentQuizIndex,
+            setCurrentIndex: (i, s) => this.setCurrentQuizIndex(i, s),
+            quizStates: this.currentPageState,
+            setQuizStates: (s) => this.setCurrentPageState(s),
+            progress: this.progress,
+        });
     }
 }
