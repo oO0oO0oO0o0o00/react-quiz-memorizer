@@ -10,6 +10,7 @@ export default class ArticleHolder {
     quizStates,
     setQuizStates,
     progress,
+    loading,
   }) {
     this._article = article;
     this._content = React.useMemo(
@@ -19,6 +20,7 @@ export default class ArticleHolder {
     this.quizStates = quizStates;
     this._setQuizStates = setQuizStates;
     this.progress = progress;
+    this.loading = loading;
   }
 
   get quizzes() {

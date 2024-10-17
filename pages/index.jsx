@@ -1,8 +1,12 @@
-import { MantineProvider } from "@mantine/core";
-const example = require("../src/data/example.json");
 import QuizCollectionPage from "../src/view/quiz-collection-page";
+import { queryPages } from "./api/[id]/pages";
 
-export default function Page() {
-  return <QuizCollectionPage collection={example}/>
+export async function getServerSideProps() {
+  return { props: { initialCollection: queryPages({
+    id: "example", from: 0, to: 1
+  }) } };
 }
- 
+
+export default function Page({ initialCollection }) {
+  return <QuizCollectionPage id="example" initialCollection={initialCollection} />
+}

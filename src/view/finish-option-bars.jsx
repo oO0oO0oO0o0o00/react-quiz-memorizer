@@ -13,6 +13,6 @@ export function FinishedOptionsBar({ holder }) {
     return <Button size="xs" radius="lg" onClick={() => holder.goNext()} style={{ width: "100%" }}>继续</Button>
 }
 
-export function NextPageOptionsBar({ onClick }) {
-    return <Button size="xs" radius="lg" onClick={onClick} style={{ width: "100%" }}>继续</Button>
+export function NextPageOptionsBar({ onClick, loading }) {
+    return <Button size="xs" radius="lg" onClick={onClick} style={{ width: "100%" }} loading={loading}>继续</Button>
 }

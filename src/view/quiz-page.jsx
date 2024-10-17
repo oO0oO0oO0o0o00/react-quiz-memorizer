@@ -8,14 +8,14 @@ import { MistakeOptionsBar, FinishedOptionsBar, NextPageOptionsBar } from "../vi
 import { FillingQuizOptionsBar } from "./filling-quiz-view";
 import U from "../utils";
 
-export default function QuizPage({ createArticle, navigation }) {
-  const article = createArticle();
+export default function QuizPage({ fetchArticle, navigation }) {
+  const article = fetchArticle();
   const elRefs = React.useRef([]);
 
   // Shrink DOM array
   React.useEffect(() => {
     elRefs.current = U.shrink(elRefs.current, article.quizzes.length);
-  }, [article.quizzes.length]);
+  }, [article.quizzes?.length]);
 
   // Quiz & page switching
   React.useEffect(() => {
@@ -65,7 +65,7 @@ export default function QuizPage({ createArticle, navigation }) {
         }
         break;
       default:
-        return <NextPageOptionsBar onClick={() => navigation.goNext()}/>;
+        return <NextPageOptionsBar onClick={() => navigation.goNext()} loading={article.loading}/>;
     }
     return <Clazz holder={article.currentQuizHolder} />;
   })();
