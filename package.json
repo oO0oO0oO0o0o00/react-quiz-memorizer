@@ -6,6 +6,8 @@
   "dependencies": {
     "@mantine/core": "^7.12.2",
     "@mantine/hooks": "^7.12.2",
+    "@supabase/ssr": "^0.5.1",
+    "@supabase/supabase-js": "^2.45.4",
     "@tabler/icons-react": "^3.17.0",
     "@types/underscore": "^1.11.15",
     "classnames": "^2.5.1",
