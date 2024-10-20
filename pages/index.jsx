@@ -2,7 +2,7 @@ import QuizCollectionPage from "../src/view/quiz-collection-page";
 import { queryPages } from "./api/[id]/pages";
 
 export async function getServerSideProps() {
-  return { props: { initialCollection: queryPages({
+  return { props: { initialCollection: await queryPages({
     id: "example", from: 0, to: 1
   }) } };
 }

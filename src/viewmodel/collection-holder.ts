@@ -4,7 +4,7 @@ import { QuizState, QuizStatus } from "./quiz";
 import ArticleHolder from "./article";
 import _ from "underscore";
 import useSWR from "swr";
-import { fetchPages, NullablePartialCollection, PartialCollection } from "../data/fetchPages";
+import { fetchPages, NullablePartialCollection, PartialCollection } from "../client/fetch-pages";
 
 interface CollectionState {
   totalPage: number
@@ -48,7 +48,7 @@ class CollectionHolder {
       () => initialState(initialCollection));
     // [this.loading, this.setLoading] = useState(false);
     useSWR([id, this.state?.page], ([id, page]) => {
-      const currentPage = page ?? 0;console.log({cp:currentPage,tt: this.state?.totalPage})
+      const currentPage = page ?? 0;
       if (this.state && currentPage >= this.state.totalPage) { return; }
       let fromPage;
       if (!this.state || !this.state?.collection[currentPage]) {

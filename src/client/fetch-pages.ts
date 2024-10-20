@@ -1,7 +1,5 @@
 import _ from "underscore";
-import U from "../utils";
-import example from './example-gen';
-import { FetchPagesOptions, FetchPagesResult } from "../../pages/api/[id]/pages";
+import { FetchPagesOptions, FetchPagesResult } from "./fetch-pages-types";
 
 export async function fetchPages(
   options: FetchPagesOptions
