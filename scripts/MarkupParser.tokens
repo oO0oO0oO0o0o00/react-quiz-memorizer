@@ -1,0 +1,15 @@
+OPEN=1
+CLOSE=2
+WSEP=3
+NL=4
+CTRL_START=5
+TEXT=6
+M_CTRL_KIND=7
+M_CTRL_CONT=8
+M_CTRL_END=9
+'['=1
+']'=2
+'/'=3
+'\n'=4
+'=='=5
+' '=9

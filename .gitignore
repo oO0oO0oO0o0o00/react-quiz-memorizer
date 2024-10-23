@@ -157,3 +157,20 @@ sketch
 # End of https://www.toptal.com/developers/gitignore/api/react,node
 .vercel
 .env*.local
+
+ 
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# End of https://mrkandreev.name/snippets/gitignore-generator/#Python
