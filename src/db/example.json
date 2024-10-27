@@ -11,8 +11,7 @@
           "猫属",
           "猫科"
         ],
-        "kind": "selection",
-        "mode": "free-sort",
+        "kind": "ordering",
         "answer": [
           1,
           3,
@@ -20,7 +19,7 @@
         ]
       },
       {
-        "kind": "fill",
+        "kind": "filling",
         "answer": "热带雨林"
       },
       {
@@ -35,8 +34,7 @@
           "盆栽",
           "乔木"
         ],
-        "kind": "selection",
-        "mode": "free-sort",
+        "kind": "ordering",
         "answer": [
           4,
           1,
@@ -58,8 +56,7 @@
           "犬属",
           "犬科"
         ],
-        "kind": "selection",
-        "mode": "free-sort",
+        "kind": "ordering",
         "quick": true,
         "answer": [
           1,
@@ -74,8 +71,7 @@
           "六常",
           "五畜"
         ],
-        "kind": "selection",
-        "mode": "single-select",
+        "kind": "ordering",
         "answer": [
           1
         ]

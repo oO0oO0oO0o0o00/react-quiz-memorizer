@@ -1,10 +1,11 @@
+import itertools
 from typing import Optional
 from enum import StrEnum, auto
 from dataclasses import dataclass, field
 from antlr4 import CommonTokenStream, FileStream, InputStream, ParserRuleContext, TerminalNode
 from MarkupLexer import MarkupLexer
 from MarkupParser import MarkupParser
-from scripts.commons import Article, QuizItem, QuizItemSegment, QuizKind
+from commons import Article, QuizItem, QuizItemSegment, QuizKind
 
 def _parseLine(text: str) -> MarkupParser.TemplateContext:
     input_stream = InputStream(text)
@@ -18,75 +19,29 @@ def _parseLine(text: str) -> MarkupParser.TemplateContext:
     return child
 
 
-@dataclass
-class _RelationId:
-    @property
-    def id(self) -> str:
-        pass
+class _AutoRelationId:
+    _value = 2333
 
-    def __eq__(self, value: object) -> bool:
-        if isinstance(value, _RelationId):
-            return self.id == value.id
-        elif isinstance(value, str):
-            return self.id == value
-        else:
-            return value == self
-        
-    def text(self) -> str:
-        return str(self.id)
-
-
-@dataclass
-class _NamedRelationId(_RelationId):
-    name: str
-
-    @property
-    def id(self) -> str:
-        return self.name
-
-
-@dataclass
-class _AutoRelationId(_RelationId):
-    @property
-    def id(self) -> str:
-        return id(self)
-
-
-@dataclass
-class _QuizItem:
-    segments: list[str] = field(default_factory=lambda: [])
-    exclusive_id: Optional[_RelationId] = None
-    link_id: Optional[_RelationId] = None
-    only_kinds: list[QuizKind] = field(default_factory=lambda: [])
-    text_start: int = 0
-    text_end: int = 0
-
-    def text(self) -> str:
-        return ''.join(self.segments)
-    
-    def to_final_form(self) -> QuizItem:
-        return QuizItem(
-            self.segments,
-            None if self.exclusive_id is None else self.exclusive_id.text(),
-            None if self.link_id is None else self.link_id.text(),
-            self.only_kinds,
-            self.text_start,
-            self.text_end)
+    @staticmethod
+    def next() -> int:
+        result = _AutoRelationId._value
+        _AutoRelationId._value += 1
+        return result
 
 
 @dataclass
 class _LineVisitState:
     text: str = ""
-    quizzes: list[_QuizItem] = field(default_factory=lambda: [])
+    quizzes: list[QuizItem] = field(default_factory=lambda: [])
 
 
-def _handleTemplate(node: MarkupParser.TemplateContext, state: _LineVisitState) -> list[str]:
+def _handleTemplate(node: MarkupParser.TemplateContext, state: _LineVisitState) -> list[QuizItemSegment]:
     result: list[QuizItemSegment] = []
     sep_count = 0
     for child in node.getChildren():
         if isinstance(child, MarkupParser.TextContext):
-            text = child.getText()
-            state.text += text
+            text: str = child.getText()
+            state.text += text.replace("\\", '')
             result.append(QuizItemSegment(text, 1 if sep_count > 1 else 0))
             sep_count = 0
         elif isinstance(child, MarkupParser.PlaceholderContext):
@@ -96,10 +51,10 @@ def _handleTemplate(node: MarkupParser.TemplateContext, state: _LineVisitState) 
     return result
 
 
-def _handlePlaceholder(node: MarkupParser.PlaceholderContext, state: _LineVisitState) -> list[str]:
+def _handlePlaceholder(node: MarkupParser.PlaceholderContext, state: _LineVisitState) -> list[QuizItemSegment]:
     ch_count = node.getChildCount()
     assert ch_count >= 3 # `[`, at least 1 actual child, then `]`
-    quiz = _QuizItem()
+    quiz = QuizItem()
     quiz.text_start = len(state.text)
     state.quizzes.append(quiz)
     quizzes_offset = len(state.quizzes)
@@ -116,13 +71,18 @@ def _handlePlaceholder(node: MarkupParser.PlaceholderContext, state: _LineVisitS
             if ctrl_ch_count == 4:
                 ctrl_content_node = ctrl.getChild(2)
             assert isinstance(ctrl_content_node, TerminalNode) # currently all ctrl req content
-            ctrl_content = ctrl_content_node.getText()
+            ctrl_content: str = ctrl_content_node.getText()
             if ctrl_kind == "m":
-                quiz.exclusive_id = _NamedRelationId(ctrl_content)
+                quiz.exclusive_id = ctrl_content
             elif ctrl_kind == "l":
-                quiz.link_id = int(ctrl_content)
+                quiz.link_id = ctrl_content
             elif ctrl_kind == "k":
                 quiz.only_kinds = [QuizKind(x) for x in ctrl_content]
+            elif ctrl_kind == "a":
+                quiz.alternative_answers = [
+                    [x if x == 'x' else int(x) for x in y]
+                    for y in ctrl_content.split(",")
+                ]
             else:
                 raise RuntimeError(
                     f"Unrecognized ctrl sequence {ctrl_kind} with content {ctrl_content}")
@@ -137,7 +97,7 @@ def _handlePlaceholder(node: MarkupParser.PlaceholderContext, state: _LineVisitS
     if len(children_quizzes) == 0: return quiz.segments
     children_named_exclusive_ids = set(
         x.exclusive_id for x in children_quizzes
-        if isinstance(x.exclusive_id, _NamedRelationId))
+        if isinstance(x.exclusive_id, str))
     assert len(children_named_exclusive_ids) <= 1, \
         ("Exclusive groups of children placeholders conflict. " +
             f"placeholders are {[x.text() for x in children_quizzes]}.")
@@ -145,12 +105,12 @@ def _handlePlaceholder(node: MarkupParser.PlaceholderContext, state: _LineVisitS
         len(children_named_exclusive_ids) == 0), \
         (f"Exclusive group of current quiz {quiz.text()}" +
             "conflict with children.")
-    if isinstance(quiz.exclusive_id, _NamedRelationId):
+    if isinstance(quiz.exclusive_id, str):
         merged_exclusive_id = quiz.exclusive_id
     elif len(children_named_exclusive_ids) > 0:
         merged_exclusive_id = list(children_named_exclusive_ids)[0]
     else:
-        merged_exclusive_id = _AutoRelationId()
+        merged_exclusive_id = _AutoRelationId.next()
     for quiz in [quiz] + [x for x in children_quizzes]:
         quiz.exclusive_id = merged_exclusive_id
     return quiz.segments
@@ -162,7 +122,7 @@ def parseLine(line: str) -> Article:
     return Article(
         "<Parsed Line>",
         state.text,
-        [x.to_final_form() for x in state.quizzes])
+        state.quizzes)
 
 
 def parseArticles(text: str) -> list[Article]:
@@ -174,12 +134,13 @@ def parseArticles(text: str) -> list[Article]:
         if len(parsed_lines) == 0: return
         article = Article('-'.join(title), '', [])
         articles.append(article)
-        for index, line in enumerate(parsed_lines):
-            article.text += line.text + '\n'
+        for line in parsed_lines:
+            prev_length = len(article.text)
             for quiz in line.quizzes:
-                quiz.text_start += index
-                quiz.text_end += index
-                article.quizzes.append(QuizItem(quiz))
+                quiz.text_start += prev_length
+                quiz.text_end += prev_length
+                article.quizzes.append(quiz)
+            article.text += line.text + '\n'
         parsed_lines.clear()
         
     for index, line in enumerate(text.splitlines()):

@@ -1,8 +1,8 @@
 import React from "react";
-import { Group, Image, Center, Button, Menu, Progress, rem } from "@mantine/core";
+import { Group, Image, Center, Button, Menu, Progress, rem, Title } from "@mantine/core";
 import { IconArrowLeft, IconDots, IconChevronLeft, IconChevronRight, IconPlayerSkipForward } from "@tabler/icons-react";
 import ArticleContent from "../view/article-content"
-import { SelectionQuizOptionsBar } from "../view/selection-quiz-view"
+import { SelectionQuizOptionsBar, OrderingQuizOptionsBar } from "../view/selection-quiz-view"
 import { QuizStatus } from "../viewmodel/quiz";
 import { MistakeOptionsBar, FinishedOptionsBar, NextPageOptionsBar } from "../view/finish-option-bars";
 import { FillingQuizOptionsBar } from "./filling-quiz-view";
@@ -54,10 +54,13 @@ export default function QuizPage({ fetchArticle, navigation }) {
         break;
       case QuizStatus.none:
         switch (article.currentQuiz?.kind) {
+          case "ordering":
+            Clazz = OrderingQuizOptionsBar;
+            break;
           case "selection":
             Clazz = SelectionQuizOptionsBar;
             break;
-          case "fill":
+          case "filling":
             Clazz = FillingQuizOptionsBar;
             break;
           default:
@@ -101,6 +104,7 @@ export default function QuizPage({ fetchArticle, navigation }) {
           value={article.progress * 100} />
       </header>
       <main>
+        <Center>{article.title}</Center>
         {article.icon ? 
         <Center>
           <Image

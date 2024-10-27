@@ -24,6 +24,10 @@ const FetchDocumentsResultItem = z.object({
   content: z.string(),
 });
 
+const CountResult = z.array(z.object({
+  count: z.number(),
+}));
+
 const FetchDocumentsResult = z.array(FetchDocumentsResultItem);
 
 type InsertFilesResultItem = z.infer<typeof InsertFilesResultItem>;
@@ -70,6 +74,15 @@ class MySupabaseClient {
     return InsertFilesResult.parse(data);
   }
 
+  async insertDocumentQuick(
+    name: string, content: string, parentId: number | null
+  ): Promise<InsertFilesResultItem> {
+    const data = await this.insertDocumentsQuick([{
+      name, content 
+    }], parentId);
+    return data[0];
+  }
+
   async insertDocumentsQuick(
     documents: InsertDocumentsItem[], parentId: number | null
   ): Promise<InsertFilesResult> {
@@ -77,6 +90,13 @@ class MySupabaseClient {
       .rpc('insert_documents_quick', humps.decamelizeKeys({ documents, parentId }))
       .throwOnError();
     return InsertFilesResult.parse(data);
+  }
+
+  async fetchDocumentQuick(
+    name: string, parentId: number | null
+  ): Promise<FetchDocumentsResultItem | null> {
+    const results = await this.fetchDocumentsQuick([name], parentId);
+    return results.length == 0 ? null : results[0];
   }
 
   async fetchDocumentsQuick(

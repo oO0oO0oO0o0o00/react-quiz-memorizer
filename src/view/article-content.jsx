@@ -13,10 +13,11 @@ export default function ArticleContent({ article, elRefs }) {
             const quiz = article.quizzes[index];
             let Clazz;
             switch (quiz.kind) {
-              case "fill":
+              case "filling":
                 Clazz = FillingQuizView;
                 break;
               case "selection":
+              case "ordering":
                 Clazz = SelectionQuizView;
                 break;
               default:

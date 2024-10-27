@@ -82,7 +82,7 @@ export default class ArticleHolder {
       Array.from(this.quizStates.keys())
     ).map(([quiz, state, index]) => {
       if (this.currentIndex > index) { return state; }
-      state.value = quiz.answer;
+      state.value = quiz.answers[0];
       state.status = QuizStatus.final;
       return state;
     }));

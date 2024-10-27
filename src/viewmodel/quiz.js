@@ -17,9 +17,10 @@ export class QuizState {
 
   static create(quiz) {
     switch (quiz.kind) {
-      case "fill":
+      case "filling":
         return new FillingQuizState();
       case "selection":
+      case "ordering":
         return new SelectionQuizState();
       default:
         return null;
@@ -45,20 +46,26 @@ export class QuizHolder {
 
   static create(quiz, state, setState, goNext) {
     switch (quiz.kind) {
-      case "fill":
+      case "filling":
         return new FillingQuizHolder(quiz, state, setState, goNext);
       case "selection":
         return new SelectionQuizHolder(quiz, state, setState, goNext);
+      case "ordering":
+        return new OrderingQuizHolder(quiz, state, setState, goNext);
       default:
         return null;
     }
   }
 
   judge() {
-    const result = _.isEqual(this.state.value, this.quiz.answer);
+    const result = _.some(
+      this.quiz.answers,
+      answer => _.isEqual(this.state.value, answer));
     this.setState({ status: result })
     return result;
   }
+
+  isCorrect() { return false; }
 
   reset() {
     this.setState({ 
@@ -69,7 +76,7 @@ export class QuizHolder {
 
   showAnswer() {
     this.setState({ 
-      value: this.quiz.answer,
+      value: this.quiz.answers[0],
       status: QuizStatus.taught,
     })
   }
@@ -84,6 +91,8 @@ export class FillingQuizHolder extends QuizHolder {
   constructor(quiz, state, setState, goNext) {
     super(quiz, state, setState, goNext);
   }
+
+  isCorrect() { return false; }
 }
 
 export class SelectionQuizHolder extends QuizHolder {
@@ -92,15 +101,18 @@ export class SelectionQuizHolder extends QuizHolder {
   }
 
   handleSelectEntry(index) {
-    let newState;
-    switch (this.quiz.mode) {
-      case "free-sort":
-        newState = [...this.state.value, index];
-        break;
-      case "single-select":
-        newState = [index];
-    }
-    this.setState({ value: newState });
+      this.setState({ value: [index] });
+      this.judge();
+  }
+}
+
+export class OrderingQuizHolder extends QuizHolder {
+  constructor(quiz, state, setState, goNext) {
+    super(quiz, state, setState, goNext);
+  }
+
+  handleSelectEntry(index) {
+    this.setState({ value: [...this.state.value, index] });
   }
 
   handleBackspace() {
@@ -110,25 +122,7 @@ export class SelectionQuizHolder extends QuizHolder {
     this.setState({ value: this.state.value.slice(0, -1) });
   }
 
-  shouldDisableEntry(index) {
-    switch (this.quiz.mode) {
-      case "free-sort":
-        return this.state.value.includes(index);
-      default:
-        return false;
-    }
-  }
-
-  shouldHighlightEntry(index) {
-    switch (this.quiz.mode) {
-      case "single-select":
-        return this.state.value.includes(index);
-      default:
-        return false;
-    }
-  }
-
-  shouldShowActions() {
-    return this.quiz.mode == "free-sort";
+  isEntrySelected(index) {
+    return this.state.value.includes(index);
   }
 }

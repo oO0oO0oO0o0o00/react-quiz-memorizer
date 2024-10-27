@@ -3,22 +3,38 @@ import _ from 'underscore';
 import example from "../../../src/db/example-gen";
 import { supabaseClient, InsertDocumentsItem } from "../../../src/db/supabase";
 import { FetchPagesOptions, FetchPagesResult } from '../../../src/client/fetch-pages-types';
+import { z } from 'zod';
+
+const MetaFile = z.object({
+  pages: z.number(),
+});
 
 export async function queryPages(
   options: FetchPagesOptions
 ): Promise<FetchPagesResult> {
   console.log(`simulated fetchPages ${options.id}/${options.from}-${options.to}`);
-  if (options.to >= example.length) {
-    options.to = example.length - 1;
+  const sessionFolder = await supabaseClient.insertFolderQuick("session", null);
+  if (sessionFolder == null) {
+    throw Error("Cannot create or get session.");
+  }
+  const metaFile = await supabaseClient.fetchDocumentQuick(
+    "meta", sessionFolder.id);
+  let pagesCount: number;
+  if (metaFile == null) {
+    pagesCount = example.length;
+    await supabaseClient.insertDocumentQuick(
+      "meta", JSON.stringify({ pages: pagesCount }), sessionFolder.id);
+  } else {
+    const meta = MetaFile.parse(JSON.parse(metaFile.content));
+    pagesCount = meta.pages;
+  }
+  if (options.to >= pagesCount) {
+    options.to = pagesCount - 1;
   }
   if (options.to < options.from) {
     throw Error("`to` cannot be less than `from`.");
   }
   const pageIds = _.range(options.from, options.to + 1);
-  const sessionFolder = await supabaseClient.insertFolderQuick("session", null);
-  if (sessionFolder == null) {
-    throw Error("Cannot create or get session.");
-  }
   const pages = new Map<number, any>();
   const existingPages = await supabaseClient.fetchDocumentsQuick(
     pageIds.map((p) => String(p)), sessionFolder.id);
@@ -59,7 +75,7 @@ export async function queryPages(
   }
   return {
     pages: pageIds,
-    totalPage: example.length,
+    totalPage: pagesCount,
     data: pageIds.map((p) => pages.get(p)),
   };
 }

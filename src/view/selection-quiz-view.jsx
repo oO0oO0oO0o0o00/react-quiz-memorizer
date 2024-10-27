@@ -43,9 +43,36 @@ export function SelectionQuizOptionsBar({ holder }) {
         .map((e, i) => {
           return (
             <Button
-              variant={holder.shouldHighlightEntry(i) ? "filled" : "outline"}
+              variant="outline"
               size="xs"
-              disabled={holder.shouldDisableEntry(i)}
+              key={i}
+              onClick={() => holder.handleSelectEntry(i)}
+            >
+              {e}
+            </Button>
+          );
+        })}
+    </Flex>
+  );
+}
+
+
+export function OrderingQuizOptionsBar({ holder }) {
+  return (
+    <Flex
+        gap={{ base: "sm", xs: "xs" }}
+        justify="flex-start"
+        align="flex-start"
+        direction="row"
+        wrap="wrap"
+      >
+      {holder.quiz.entries
+        .map((e, i) => {
+          return (
+            <Button
+              variant={holder.isEntrySelected(i) ? "filled" : "outline"}
+              size="xs"
+              disabled={holder.isEntrySelected(i)}
               key={i}
               onClick={() => holder.handleSelectEntry(i)}
             >
@@ -53,27 +80,24 @@ export function SelectionQuizOptionsBar({ holder }) {
             </Button>
           );
         })
-        .concat(
-          holder.shouldShowActions
-            ? [
-                <ActionIcon
-                  variant="light"
-                  aria-label="backspace"
-                  size="input-xs"
-                  key="backspace"
-                  disabled={!holder.state.value.length}
-                  onClick={() => holder.handleBackspace()}
-                >
-                  <IconBackspace
-                    style={{ width: "70%", height: "70%" }}
-                    stroke={1.5}
-                  />
-                </ActionIcon>,
-                <ActionIcon aria-label="confirm" size="input-xs" key="confirm" onClick={() => holder.judge()}>
-                  <IconCheck style={{ width: "70%", height: "70%" }} stroke={1.5} />
-                </ActionIcon>,
-              ] : []
-        )}
+        .concat([
+          <ActionIcon
+            variant="light"
+            aria-label="backspace"
+            size="input-xs"
+            key="backspace"
+            disabled={!holder.state.value.length}
+            onClick={() => holder.handleBackspace()}
+          >
+            <IconBackspace
+              style={{ width: "70%", height: "70%" }}
+              stroke={1.5}
+            />
+          </ActionIcon>,
+          <ActionIcon aria-label="confirm" size="input-xs" key="confirm" onClick={() => holder.judge()}>
+            <IconCheck style={{ width: "70%", height: "70%" }} stroke={1.5} />
+          </ActionIcon>,
+        ])}
     </Flex>
   );
 }
