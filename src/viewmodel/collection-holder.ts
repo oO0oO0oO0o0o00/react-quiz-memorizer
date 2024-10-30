@@ -1,18 +1,19 @@
 import { useImmer } from "use-immer";
 import U from "../utils";
-import { QuizState, QuizStatus } from "./quiz";
+import { QuizState, QuizStatus } from "./quiz-holders";
 import ArticleHolder from "./article";
 import _ from "underscore";
 import useSWR from "swr";
 import { fetchPages, NullablePartialCollection, PartialCollection } from "../client/fetch-pages";
+import { Article } from "../model/collection";
 
 interface CollectionState {
-  totalPage: number
-  progressPage: number
-  page: number
-  quizIndexes: number[]
-  collection: any[]
-  pageStates: (any[] | null)[]
+  totalPage: number;
+  progressPage: number;
+  page: number;
+  quizIndexes: number[];
+  collection: Article[];
+  pageStates: (any[] | null)[];
 }
 
 type NullableCollectionState = CollectionState | null

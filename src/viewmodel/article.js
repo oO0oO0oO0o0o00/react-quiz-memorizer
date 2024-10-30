@@ -1,6 +1,6 @@
 import React from "react";
 import _ from 'underscore';
-import { QuizHolder, QuizState, QuizStatus } from "./quiz"
+import { QuizHolder, QuizState, QuizStatus } from "./quiz-holders"
 
 export default class ArticleHolder {
   constructor({ 

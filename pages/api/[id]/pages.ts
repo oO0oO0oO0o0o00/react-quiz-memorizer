@@ -12,7 +12,7 @@ const MetaFile = z.object({
 export async function queryPages(
   options: FetchPagesOptions
 ): Promise<FetchPagesResult> {
-  console.log(`simulated fetchPages ${options.id}/${options.from}-${options.to}`);
+  console.log(`fetchPages ${options.id}/${options.from}-${options.to}`);
   const sessionFolder = await supabaseClient.insertFolderQuick("session", null);
   if (sessionFolder == null) {
     throw Error("Cannot create or get session.");

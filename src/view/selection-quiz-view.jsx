@@ -3,7 +3,7 @@ import { Button, ActionIcon, Flex } from "@mantine/core";
 import { IconBackspace } from "@tabler/icons-react";
 import { IconCheck } from "@tabler/icons-react";
 import U from "../utils";
-import { QuizStatus } from "../viewmodel/quiz";
+import { QuizStatus } from "../viewmodel/quiz-holders";
 
 export function SelectionQuizView({
   active,

@@ -12,15 +12,26 @@
           "猫科"
         ],
         "kind": "ordering",
-        "answer": [
-          1,
-          3,
-          2
+        "answers": [
+          [
+            1,
+            3,
+            2
+          ]
         ]
       },
       {
         "kind": "filling",
-        "answer": "热带雨林"
+        "answers": [
+          [
+            0,
+            1
+          ]
+        ],
+        "entries": [
+          "热带",
+          "雨林"
+        ]
       },
       {
         "entries": [
@@ -35,12 +46,12 @@
           "乔木"
         ],
         "kind": "ordering",
-        "answer": [
+        "answers": [[
           4,
           1,
           3,
           6
-        ]
+        ]]
       }
     ]
   },
@@ -58,11 +69,11 @@
         ],
         "kind": "ordering",
         "quick": true,
-        "answer": [
+        "answers": [[
           1,
           3,
           2
-        ]
+        ]]
       },
       {
         "entries": [
@@ -72,9 +83,9 @@
           "五畜"
         ],
         "kind": "ordering",
-        "answer": [
+        "answers": [[
           1
-        ]
+        ]]
       }
     ]
   }

@@ -3,7 +3,7 @@ import { Group, Image, Center, Button, Menu, Progress, rem, Title } from "@manti
 import { IconArrowLeft, IconDots, IconChevronLeft, IconChevronRight, IconPlayerSkipForward } from "@tabler/icons-react";
 import ArticleContent from "../view/article-content"
 import { SelectionQuizOptionsBar, OrderingQuizOptionsBar } from "../view/selection-quiz-view"
-import { QuizStatus } from "../viewmodel/quiz";
+import { QuizStatus } from "../viewmodel/quiz-holders";
 import { MistakeOptionsBar, FinishedOptionsBar, NextPageOptionsBar } from "../view/finish-option-bars";
 import { FillingQuizOptionsBar } from "./filling-quiz-view";
 import U from "../utils";

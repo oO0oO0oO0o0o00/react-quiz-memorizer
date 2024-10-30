@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { Button } from "@mantine/core";
 import ContentEditable from "./react-contenteditable";
 import U from "../utils";
-import { QuizStatus } from "../viewmodel/quiz";
+import { QuizStatus } from "../viewmodel/quiz-holders";
 
 const maxSpaces = 10;
 

@@ -1,10 +1,27 @@
 import { createClient } from '@supabase/supabase-js';
 import humps from "humps";
 import { z } from 'zod';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import nodeFetch from 'node-fetch';
+
+const isWindows = process.platform === "win32";
+const proxy = isWindows ? new HttpsProxyAgent('http://localhost:10809') : null;
+
+function proxifiedFetch(
+  input: string | URL | globalThis.Request,
+  init?: RequestInit,
+): Promise<Response> {
+  return nodeFetch(input as any, {...init as any, agent: proxy}) as any;
+}
 
 const rawClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    global: {
+      fetch: isWindows ? proxifiedFetch : fetch
+    }
+  }
 );
 
 // Do you think IDL / ORM can help?
