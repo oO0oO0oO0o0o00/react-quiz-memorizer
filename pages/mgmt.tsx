@@ -25,10 +25,12 @@ export default function Page({  }) {
                 <Space h="md" />
                 <Button onClick={handleResetSession} loading={loading}>Reset Session</Button>
                 <Space h="md" />
+                <Container>{state}</Container>
+                <Space h="md" />
                 <Button onClick={() => setMatchTestResult(textMatches({
                     answers: [[1, 0, 2], [0, 2, 1], [0, 'x', 'x']],
-                    entries: ["我是", "一只猫", "喵~"]
-                } as any, "我是一只猫喵~"))}>Test Text Matcher</Button>
+                    entries: ["我是", "一只\\的猫", "喵~"]
+                } as any, "我是一只猫mia~", {'猫': ['miao']}))}>Test Text Matcher</Button>
                 <Space h="md" />
                 <div>Matches: {matchTestResult ? 'Y' : 'N'}</div>
             </Container>

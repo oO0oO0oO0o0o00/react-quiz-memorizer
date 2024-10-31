@@ -100,7 +100,7 @@ export default function QuizPage({ fetchArticle, navigation }) {
             </Menu.Dropdown>
           </Menu>
         </Group>
-        <Progress size="xs" radius={null}
+        <Progress size="xs" radius="sm"
           value={article.progress * 100} />
       </header>
       <main>

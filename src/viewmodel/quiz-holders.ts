@@ -54,15 +54,18 @@ export abstract class QuizHolder {
   state: QuizState;
   setState: (args: QuizSetStateArgs) => void
   _goNext: () => void;
+  pinyinMap: Record<string, string[]>;
 
   constructor(
     quiz: Quiz,
     state: QuizState,
     setState: (args: QuizSetStateArgs) => void,
-    goNext: () => void
+    goNext: () => void,
+    pinyinMap: Record<string, string[]>,
   ) {
     this.quiz = quiz;
     this.state = state;
+    this.pinyinMap = pinyinMap;
     this.setState = setState;
     this._goNext = goNext;
   }
@@ -71,15 +74,16 @@ export abstract class QuizHolder {
     quiz: Quiz,
     state: QuizState,
     setState: (args: QuizSetStateArgs) => void,
-    goNext: () => void
+    goNext: () => void,
+    pinyinMap: Record<string, string[]>,
   ): QuizHolder {
     switch (quiz.kind) {
       case QuizKind.filling:
-        return new FillingQuizHolder(quiz, state, setState, goNext);
+        return new FillingQuizHolder(quiz, state, setState, goNext, pinyinMap);
       case QuizKind.selection:
-        return new SelectionQuizHolder(quiz, state, setState, goNext);
+        return new SelectionQuizHolder(quiz, state, setState, goNext, pinyinMap);
       case QuizKind.ordering:
-        return new OrderingQuizHolder(quiz, state, setState, goNext);
+        return new OrderingQuizHolder(quiz, state, setState, goNext, pinyinMap);
     }
   }
 
@@ -94,11 +98,13 @@ export abstract class QuizHolder {
 
   abstract isCorrect(): boolean;
 
+  abstract get shouldClearOnReset(): boolean;
+
   reset() {
     this.setState({ 
-      value: this.state.initialValue,
+      value: this.shouldClearOnReset ? this.state.initialValue : null,
       status: QuizStatus.none,
-    })
+    });
   }
 
   showAnswer() {
@@ -125,8 +131,10 @@ export class FillingQuizHolder extends QuizHolder {
     if (typeof value != "string") {
       return false;
     }
-    return textMatches(this.quiz, value);
+    return textMatches(this.quiz, value, this.pinyinMap);
   }
+
+  get shouldClearOnReset() { return false; }
 
   get standardAnswer(): string {
     return (this.quiz.answers[0] as number[])
@@ -139,6 +147,8 @@ export class SelectionQuizHolder extends QuizHolder {
   isCorrect() {
     return _.isEqual(this.quiz.answers[0], this.state.value);
   }
+
+  get shouldClearOnReset() { return true; }
 
   get standardAnswer(): number[] {
     return this.quiz.answers[0] as any;
@@ -166,6 +176,8 @@ export class OrderingQuizHolder extends QuizHolder {
         _.zip(answer, value),
         ([a, b]) => a == b || a == 'x' && b <= maxIndex));
   }
+
+  get shouldClearOnReset() { return true; }
   
   get standardAnswer(): number[] {
     return this.quiz.answers[0] as any;

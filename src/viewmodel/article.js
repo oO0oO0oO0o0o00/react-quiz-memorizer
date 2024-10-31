@@ -9,6 +9,7 @@ export default class ArticleHolder {
     setCurrentIndex,
     quizStates,
     setQuizStates,
+    pinyinMap,
     progress,
     loading,
   }) {
@@ -19,6 +20,7 @@ export default class ArticleHolder {
     this.setCurrentIndex = setCurrentIndex;
     this.quizStates = quizStates;
     this._setQuizStates = setQuizStates;
+    this.pinyinMap = pinyinMap;
     this.progress = progress;
     this.loading = loading;
   }
@@ -67,7 +69,7 @@ export default class ArticleHolder {
       },
       () => { // goNext
         this.setCurrentIndex(this.currentIndex + 1);
-      }
+      }, this.pinyinMap,
     );
   }
 

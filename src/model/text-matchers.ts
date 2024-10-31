@@ -55,7 +55,9 @@ function *chainIterator<T>(matchers: Generator<T>[]) {
   }
 }
 
-export function textMatches(quiz: Quiz, text: string) {
+export function textMatches(
+  quiz: Quiz, text: string, pinyinMap: Record<string, string[]>
+) {
   const matcher = chainIterator(quiz.answers.map(
     (a) => wildcardIterator(a, quiz.entries)));
   let cnt = 0;
@@ -63,30 +65,31 @@ export function textMatches(quiz: Quiz, text: string) {
     if (cnt > 99) { return false; }
     cnt += 1;
     const pattern = segments.join('');
-    console.log({reg:pattern});
-    if (_toRegex(pattern).test(text)) {
+    if (_toRegex(pattern, pinyinMap).test(text.replaceAll(' ', ''))) {
       return true;
     }
   }
   return false;
 }
 
-function _toRegex(pattern: string): RegExp {
+function _toRegex(pattern: string, pinyinMap: Record<string, string[]>): RegExp {
+  const ignoreChars = new Set(Array.from("，。、,."));
+  let escaping = false;
   return new RegExp(Array.from(pattern).map((character) => {
-    // TODO: escaping
+    if (character == '\\') {
+      escaping = true;
+      return '';
+    }
     let alts = [character].concat(
       _.flatten<string[]>(
-        _transcribe(character).map(
+        (pinyinMap[character] ?? []).map(
           (text) => {
             // miao -> m(i(a(o)?)?)?
             const arr = Array.from(text);
             return `${arr.join('(')}${Array(arr.length - 1).fill(")?").join('')}`;
           }), 1));
-    return alts.length == 1 ? alts : `(${alts.join('|')})`
+    const result = `(${alts.join('|')})${escaping != (ignoreChars.has(character)) ? '?' : ''}`;
+    escaping = false;
+    return result;
   }).join(''));
-}
-
-function _transcribe(character: string): string[] {
-  // TODO: Support PinYin.
-  return ["miao"];
 }

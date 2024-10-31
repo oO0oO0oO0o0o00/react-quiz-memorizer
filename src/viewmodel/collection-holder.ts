@@ -14,6 +14,7 @@ interface CollectionState {
   quizIndexes: number[];
   collection: Article[];
   pageStates: (any[] | null)[];
+  pinyinMap: Record<string, string[]>;
 }
 
 type NullableCollectionState = CollectionState | null
@@ -108,6 +109,7 @@ class CollectionHolder {
         setCurrentIndex: (i: number) => this.setCurrentQuizIndex(i),
         quizStates: state.pageStates[state.page],
         setQuizStates: (s: QuizState) => this.setCurrentPageState(s),
+        pinyinMap: state.pinyinMap,
         progress: progress(state),
         loading: false, // this.loading,
       }));
@@ -133,6 +135,7 @@ function createState(partial: PartialCollection): CollectionState {
     quizIndexes: Array(partial.totalPage).fill(0),
     collection: Array(partial.totalPage),
     pageStates: Array(partial.totalPage),
+    pinyinMap: partial?.pinyinMap ?? {},
   };
 }
 
@@ -142,6 +145,7 @@ function patchState(state: CollectionState, partial: PartialCollection) {
   )) {
     state.collection[page] = article;
     state.pageStates[page] = article.quizzes.map(QuizState.create);
+    state.pinyinMap = Object.assign({}, state.pinyinMap, partial.pinyinMap);
   }
 }
 

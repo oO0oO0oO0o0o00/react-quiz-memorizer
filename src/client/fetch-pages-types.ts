@@ -13,6 +13,7 @@ export const FetchPagesResult = z.object({
   pages: z.array(z.number()),
   totalPage: z.number(),
   data: z.array(z.any()),
+  pinyinMap: z.record(z.string(), z.array(z.string())),
 });
 
 export type FetchPagesResult = z.infer<typeof FetchPagesResult>;

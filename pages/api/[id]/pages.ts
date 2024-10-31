@@ -4,6 +4,8 @@ import example from "../../../src/db/example-gen";
 import { supabaseClient, InsertDocumentsItem } from "../../../src/db/supabase";
 import { FetchPagesOptions, FetchPagesResult } from '../../../src/client/fetch-pages-types';
 import { z } from 'zod';
+import { ArticleType, QuizKind } from '../../../src/model/collection';
+import { PinYins } from '../../../src/api/pinyin';
 
 const MetaFile = z.object({
   pages: z.number(),
@@ -35,16 +37,16 @@ export async function queryPages(
     throw Error("`to` cannot be less than `from`.");
   }
   const pageIds = _.range(options.from, options.to + 1);
-  const pages = new Map<number, any>();
+  const pages = new Map<number, ArticleType>();
   const existingPages = await supabaseClient.fetchDocumentsQuick(
     pageIds.map((p) => String(p)), sessionFolder.id);
   for (const page of existingPages) {
-    pages.set(parseInt(page.name), JSON.parse(page.content));
+    pages.set(parseInt(page.name), ArticleType.parse(JSON.parse(page.content)));
   }
   const generatedPages: InsertDocumentsItem[] = [];
   for (const page of pageIds) {
     if (!pages.has(page)) {
-      const pageData = example[page]; // simulate generation
+      const pageData = ArticleType.parse(example[page]); // simulate generation
       pages.set(page, pageData);
       generatedPages.push({ 
         name: String(page),
@@ -73,10 +75,27 @@ export async function queryPages(
     // Why is this being written here in the code? Who knows.
     // If this comment make you uncomfortable, you deserve it.
   }
+  let pinyinMap: Record<string, string[]> = {};
+  for (const page of pages.values()) {
+    for (const quiz of page.quizzes) {
+      if (quiz.kind != QuizKind.filling) {
+        continue;
+      }
+      for (const entry of quiz.entries) {
+        for (const ch of entry) {
+          const pys = PinYins.get(ch);
+          if (pys) {
+            pinyinMap[ch] = pys;
+          }
+        }
+      }
+    }
+  }
   return {
     pages: pageIds,
     totalPage: pagesCount,
     data: pageIds.map((p) => pages.get(p)),
+    pinyinMap: pinyinMap,
   };
 }
  
