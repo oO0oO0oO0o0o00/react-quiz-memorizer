@@ -68,8 +68,9 @@ export default class ContentEditable extends React.Component<Props> {
         onKeyDown: this.props.onKeyDown || this.emitChange,
         suppressContentEditableWarning: true,
         contentEditable: this.props.disabled ? "false" : "plaintext-only",
-        onCompositionStart: () => { this.setState({...this.state, composing: true}); },
-        onCompositionEnd: (e: any) => {
+        onCompositionStart: () => { 
+          this.setState({...this.state, composing: true});
+        }, onCompositionEnd: (e: any) => {
           this.setState({...this.state, composing: false});
           // iOS Safari: 中文输入法联想词 start -> input -> end
           this.emitChange(e, true);
@@ -91,6 +92,11 @@ export default class ContentEditable extends React.Component<Props> {
       return true;
     }
 
+    if (!this.state.composing &&
+      strip(el.innerText) != nextProps.text) { 
+        return true; 
+      }
+
     // Handle additional properties
     return (
       props.disabled !== nextProps.disabled ||
@@ -107,9 +113,9 @@ export default class ContentEditable extends React.Component<Props> {
 
     // Perhaps React (whose VDOM gets outdated because we often prevent
     // rerendering) did not update the DOM. So we update it manually now.
-    if (this.props.text !== strip(el.innerText)) {
-      el.innerText = this.displayText(this.props.text);
-    }
+    // if (this.props.text !== strip(el.innerText)) {
+    //   el.innerText = this.displayText(this.props.text);
+    // }
     this.lastText = this.props.text;
   }
 
@@ -129,7 +135,7 @@ export default class ContentEditable extends React.Component<Props> {
     el.setAttribute("data-post", this.props['data-post']);
 
     if (this.props.onChange && stripped !== this.lastText) {
-      console.log(`🐱 emitChange(${stripped})`);
+      // console.log(`🐱 emitChange(${stripped})`);
       const evt = Object.assign({}, originalEvt, {
         target: {
           value: stripped,
@@ -156,7 +162,9 @@ export interface Props extends DivProps {
   tagName?: string;
   className?: string;
   style?: Object;
+  placeholder?: string;
   innerRef?: React.RefObject<HTMLElement> | Function;
+  enterKeyHint: string | undefined;
   "data-pre": string,
   "data-post": string,
 }
