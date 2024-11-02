@@ -1,22 +1,23 @@
 import React from "react";
 import classNames from "classnames";
 import { Button } from "@mantine/core";
-import ContentEditable from "./react-contenteditable";
+import ContentEditable, { ContentEditableEvent } from "./react-contenteditable";
 import U from "../utils";
-import { QuizStatus } from "../viewmodel/quiz-holders";
+import { FillingQuizHolder, QuizStatus } from "../viewmodel/quiz-holders";
+import { QuizOptionsBarProps, QuizViewProps } from "./quiz-view";
 
 const maxSpaces = 10;
 
 export function FillingQuizView({
   active,
   holder,
-  onFocused,
+  onFocused = () => undefined,
   innerRef,
-}) {
-  const contentEditable = React.createRef();
+}: QuizViewProps<string, FillingQuizHolder>) {
+  const contentEditable = React.useRef<HTMLElement | null>();
   const spaces = Math.max(maxSpaces - U.wtfLength(holder.state.value), 0);
 
-  function handleTextChange(e) {
+  function handleTextChange(e: ContentEditableEvent) {
     if (e.target.value.includes("\n")) {
       holder.judge();
       return;
@@ -26,7 +27,7 @@ export function FillingQuizView({
     holder.setState({ value: newState });
   }
 
-  function updateRef(el) {
+  function updateRef(el: HTMLElement) {
     contentEditable.current = el;
     if (typeof innerRef === "function") {
       innerRef(el);
@@ -56,6 +57,6 @@ export function FillingQuizView({
   );
 }
 
-export function FillingQuizOptionsBar({ holder }) {
+export function FillingQuizOptionsBar({ holder }: QuizOptionsBarProps<FillingQuizHolder>) {
   return <Button size="xs" radius="lg" onClick={() => holder.judge()} style={{ width: "100%" }}>确认</Button>
 }

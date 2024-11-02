@@ -3,14 +3,15 @@ import { Button, ActionIcon, Flex, Grid, Space, Center } from "@mantine/core";
 import { IconBackspace } from "@tabler/icons-react";
 import { IconCheck } from "@tabler/icons-react";
 import U from "../utils";
-import { QuizStatus } from "../viewmodel/quiz-holders";
+import { OrderingQuizHolder, QuizHolder, QuizStatus, SelectionQuizHolder } from "../viewmodel/quiz-holders";
+import { QuizOptionsBarProps, QuizViewProps } from "./quiz-view";
 
 export function SelectionQuizView({
   active,
   holder,
-  onFocused,
+  onFocused = () => undefined,
   innerRef,
-}) {
+}: QuizViewProps<number[], SelectionQuizHolder | OrderingQuizHolder>) {
   const text = holder.state.value.reduce(
     (s, i) => s + holder.quiz.entries[i], "");
   return (
@@ -21,7 +22,7 @@ export function SelectionQuizView({
         wrong: holder.state.status === QuizStatus.wrong,
         right: holder.state.status === QuizStatus.right,
       })}
-      tabIndex={active ? 0 : null}
+      tabIndex={active ? 0 : undefined}
       onFocus={() => onFocused()}
       ref={innerRef}
     >
@@ -30,7 +31,9 @@ export function SelectionQuizView({
   );
 }
 
-export function SelectionQuizOptionsBar({ holder }) {
+export function SelectionQuizOptionsBar(
+  { holder }: QuizOptionsBarProps<SelectionQuizHolder>
+) {
   return (
     <Flex
         gap={{ base: "sm", xs: "xs" }}
@@ -56,7 +59,7 @@ export function SelectionQuizOptionsBar({ holder }) {
   );
 }
 
-export function OrderingQuizOptionsBar({ holder }) {
+export function OrderingQuizOptionsBar({ holder }: QuizOptionsBarProps<OrderingQuizHolder>) {
   return (
     <>
       <Flex

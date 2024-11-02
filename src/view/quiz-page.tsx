@@ -1,34 +1,48 @@
 import React from "react";
 import { Group, Image, Center, Button, Menu, Progress, rem, Title } from "@mantine/core";
-import { IconArrowLeft, IconDots, IconChevronLeft, IconChevronRight, IconPlayerSkipForward } from "@tabler/icons-react";
-import ArticleContent from "../view/article-content"
-import { SelectionQuizOptionsBar, OrderingQuizOptionsBar } from "../view/selection-quiz-view"
+import { IconArrowLeft,
+  IconDots,
+  IconChevronLeft,
+  IconChevronRight,
+  IconPlayerSkipForward,
+  IconRotate,
+} from "@tabler/icons-react";
+import ArticleContent from "./article-content"
 import { QuizStatus } from "../viewmodel/quiz-holders";
-import { MistakeOptionsBar, FinishedOptionsBar, NextPageOptionsBar } from "../view/finish-option-bars";
-import { FillingQuizOptionsBar } from "./filling-quiz-view";
+import { MistakeOptionsBar, FinishedOptionsBar, NextPageOptionsBar } from "./finish-option-bars";
 import U from "../utils";
+import ArticleHolder from "../viewmodel/article";
+import QuizNavigationHolder from "../viewmodel/quiz-navigation"
+import { QuizOptionsBar } from "./quiz-view-dispatch";
 
-export default function QuizPage({ fetchArticle, navigation }) {
+interface QuizPageProp {
+  fetchArticle: () => ArticleHolder;
+  navigation: QuizNavigationHolder;
+}
+
+export default function QuizPage(
+  { fetchArticle, navigation }: QuizPageProp
+) {
   const article = fetchArticle();
-  const elRefs = React.useRef([]);
+  const elRefs = React.useRef<HTMLElement[]>([]);
 
   // Shrink DOM array
   React.useEffect(() => {
     elRefs.current = U.shrink(elRefs.current, article.quizzes.length);
   }, [article.quizzes?.length]);
 
-  // Quiz & page switching
+  // Quiz auto focus
   React.useEffect(() => {
-    if (article.currentIndex < article.quizzes.length) {
-      focusQuiz(article.currentIndex);
+    if (article.state.currentIndex < article.quizzes.length) {
+      focusQuiz(article.state.currentIndex);
     }
   }, [
     article,
-    article.currentIndex,
-    article.quizStates[article.currentIndex]?.status,
+    article.state.currentIndex,
+    article.state.quizStates[article.state.currentIndex]?.status,
   ]);
 
-  function focusQuiz(index) {
+  function focusQuiz(index: number) {
     const el = elRefs.current[index];
     if (el) {
       el.scrollIntoView();
@@ -42,6 +56,10 @@ export default function QuizPage({ fetchArticle, navigation }) {
     navigation.goNext();
   }
 
+  function handleResetQuiz() {
+    article.currentQuiz;
+  }
+
   const optionsBar = (() => {
     let Clazz;
     switch (article.currentQuizState?.status) {
@@ -53,26 +71,16 @@ export default function QuizPage({ fetchArticle, navigation }) {
         Clazz = FinishedOptionsBar;
         break;
       case QuizStatus.none:
-        switch (article.currentQuiz?.kind) {
-          case "ordering":
-            Clazz = OrderingQuizOptionsBar;
-            break;
-          case "selection":
-            Clazz = SelectionQuizOptionsBar;
-            break;
-          case "filling":
-            Clazz = FillingQuizOptionsBar;
-            break;
-          default:
-            return null;
-        }
-        break;
+        return <QuizOptionsBar holder={article.currentQuizHolder}/>
       default:
-        return <NextPageOptionsBar onClick={() => navigation.goNext()} loading={article.loading}/>;
+        return <NextPageOptionsBar
+          onClick={() => navigation.goNext()}
+          loading={article.state.loading}/>;
     }
     return <Clazz holder={article.currentQuizHolder} />;
   })();
 
+  const menuIconStyle = { width: rem(14), height: rem(14) };
   return (
     <>
       <header className="layer">
@@ -93,15 +101,24 @@ export default function QuizPage({ fetchArticle, navigation }) {
             </Menu.Target>
             <Menu.Dropdown>
               <Menu.Item
-                leftSection={<IconPlayerSkipForward style={{ width: rem(14), height: rem(14) }} />}
+                key="skip"
+                leftSection={<IconPlayerSkipForward style={menuIconStyle} />}
                 onClick={() => handleSkip()}>
-                Skip
+                跳过此页
               </Menu.Item>
+              {U.isDev ? [
+                <Menu.Item
+                  key="reset-quiz"
+                  leftSection={<IconRotate style={menuIconStyle} />}
+                  onClick={() => handleResetQuiz()}>
+                  重置题目
+                </Menu.Item>
+              ] : []}
             </Menu.Dropdown>
           </Menu>
         </Group>
         <Progress size="xs" radius="sm"
-          value={article.progress * 100} />
+          value={article.state.progress * 100} />
       </header>
       <main>
         <Center>{article.title}</Center>

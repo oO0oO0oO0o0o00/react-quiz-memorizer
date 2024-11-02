@@ -4,8 +4,11 @@ import { z } from 'zod';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import nodeFetch from 'node-fetch';
 
-const isWindows = process.platform === "win32";
-const proxy = isWindows ? new HttpsProxyAgent('http://localhost:10809') : null;
+const proxy = process.platform === "win32" ?
+  new HttpsProxyAgent('http://localhost:10809') : (
+    process.platform === "darwin" ?
+      new HttpsProxyAgent('http://localhost:1087') : null
+  );
 
 function proxifiedFetch(
   input: string | URL | globalThis.Request,
@@ -19,7 +22,7 @@ const rawClient = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
   {
     global: {
-      fetch: isWindows ? proxifiedFetch : fetch
+      fetch: proxy ? proxifiedFetch : fetch
     }
   }
 );

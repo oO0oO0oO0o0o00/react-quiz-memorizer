@@ -20,7 +20,7 @@ export default class U {
     );
   }
 
-  static shrink(arr: any[], expectedLength: number) {
+  static shrink<T>(arr: T[], expectedLength: number) {
     if (arr.length > (expectedLength << 2)) {
       return arr.slice(0, expectedLength << 1);
     } else { 
@@ -53,5 +53,9 @@ export default class U {
 
   static repeat<T>(arr: T[], repeats: number): T[] {
     return Array.from({ length: repeats }, () => arr).flat();
+  }
+
+  static get isDev(): boolean {
+    return process.env.NODE_ENV == "development";
   }
 }

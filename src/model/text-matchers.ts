@@ -65,15 +65,16 @@ export function textMatches(
     if (cnt > 99) { return false; }
     cnt += 1;
     const pattern = segments.join('');
-    if (_toRegex(pattern, pinyinMap).test(text.replaceAll(' ', ''))) {
+    if (toRegex(pattern, pinyinMap).test(text.replaceAll(' ', ''))) {
       return true;
     }
   }
   return false;
 }
 
-function _toRegex(pattern: string, pinyinMap: Record<string, string[]>): RegExp {
-  const ignoreChars = new Set(Array.from("，。、,."));
+const ignoreChars = new Set(Array.from("，。、,."));
+
+function toRegex(pattern: string, pinyinMap: Record<string, string[]>): RegExp {
   let escaping = false;
   return new RegExp(Array.from(pattern).map((character) => {
     if (character == '\\') {
@@ -91,5 +92,5 @@ function _toRegex(pattern: string, pinyinMap: Record<string, string[]>): RegExp 
     const result = `(${alts.join('|')})${escaping != (ignoreChars.has(character)) ? '?' : ''}`;
     escaping = false;
     return result;
-  }).join(''));
+  }).join(''), 'i');
 }

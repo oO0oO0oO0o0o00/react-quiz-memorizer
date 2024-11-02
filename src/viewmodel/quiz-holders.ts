@@ -10,22 +10,22 @@ export enum QuizStatus {
   final,
 }
 
-export abstract class QuizState {
+export abstract class QuizState<T> {
   status: QuizStatus;
-  value: string | number[];
-  score: null;
+  value: T;
+  score: boolean | null;
   
   constructor() {
     this.status = QuizStatus.none;
-    this.value = (this.constructor as any).initialValue;
+    this.value = this.initialValue;
     this.score = null;
   }
 
-  get initialValue(): string | number[] {
+  get initialValue(): T {
     return (this.constructor as any).initialValue;
   }
 
-  static create(quiz: Quiz): QuizState {
+  static create(quiz: Quiz): QuizState<any> {
     switch (quiz.kind) {
       case QuizKind.filling:
         return new FillingQuizState();
@@ -36,30 +36,30 @@ export abstract class QuizState {
   }
 }
 
-export class FillingQuizState extends QuizState {
+export class FillingQuizState extends QuizState<string> {
   static get initialValue() { return "" }
 }
 
-export class SelectionQuizState extends QuizState {
+export class SelectionQuizState extends QuizState<number[]> {
   static get initialValue() { return [] }
 }
 
-interface QuizSetStateArgs {
-  value: string | number[] | null;
-  status: QuizStatus | null;
-}
+type QuizSetStateArgs<T> = Partial<{
+  value: T;
+  status: QuizStatus;
+}>
 
-export abstract class QuizHolder {
+export abstract class QuizHolder<T> {
   quiz: Quiz;
-  state: QuizState;
-  setState: (args: QuizSetStateArgs) => void
+  state: QuizState<T>;
+  setState: (args: QuizSetStateArgs<T>) => void
   _goNext: () => void;
   pinyinMap: Record<string, string[]>;
 
   constructor(
     quiz: Quiz,
-    state: QuizState,
-    setState: (args: QuizSetStateArgs) => void,
+    state: QuizState<T>,
+    setState: (args: QuizSetStateArgs<T>) => void,
     goNext: () => void,
     pinyinMap: Record<string, string[]>,
   ) {
@@ -72,11 +72,11 @@ export abstract class QuizHolder {
 
   static create(
     quiz: Quiz,
-    state: QuizState,
-    setState: (args: QuizSetStateArgs) => void,
-    goNext: () => void,
-    pinyinMap: Record<string, string[]>,
-  ): QuizHolder {
+    state: QuizState<any>,
+    setState: (args: QuizSetStateArgs<any>) => void = () => undefined,
+    goNext: () => void = () => undefined,
+    pinyinMap: Record<string, string[]> = {},
+  ): QuizHolder<any> {
     switch (quiz.kind) {
       case QuizKind.filling:
         return new FillingQuizHolder(quiz, state, setState, goNext, pinyinMap);
@@ -91,7 +91,7 @@ export abstract class QuizHolder {
     const result = this.isCorrect();
     this.setState({ 
       status: result ? QuizStatus.right : QuizStatus.wrong,
-      value: result ? this.standardAnswer : null,
+      value: result ? this.standardAnswer : undefined,
     })
     return result;
   }
@@ -100,9 +100,11 @@ export abstract class QuizHolder {
 
   abstract get shouldClearOnReset(): boolean;
 
+  abstract get standardAnswer(): T;
+
   reset() {
     this.setState({ 
-      value: this.shouldClearOnReset ? this.state.initialValue : null,
+      value: this.shouldClearOnReset ? this.state.initialValue : undefined,
       status: QuizStatus.none,
     });
   }
@@ -114,23 +116,15 @@ export abstract class QuizHolder {
     })
   }
 
-  abstract get standardAnswer(): string | number[];
-
   goNext() {
-    this.setState({ 
-      status: QuizStatus.final,
-      value: null,
-    });
+    this.setState({ status: QuizStatus.final });
     this._goNext();
   }
 }
 
-export class FillingQuizHolder extends QuizHolder {
+export class FillingQuizHolder extends QuizHolder<string> {
   isCorrect() {
     const value = this.state.value;
-    if (typeof value != "string") {
-      return false;
-    }
     return textMatches(this.quiz, value, this.pinyinMap);
   }
 
@@ -143,7 +137,7 @@ export class FillingQuizHolder extends QuizHolder {
   }
 }
 
-export class SelectionQuizHolder extends QuizHolder {
+export class SelectionQuizHolder extends QuizHolder<number[]> {
   isCorrect() {
     return _.isEqual(this.quiz.answers[0], this.state.value);
   }
@@ -155,20 +149,14 @@ export class SelectionQuizHolder extends QuizHolder {
   }
 
   handleSelectEntry(index: number) {
-      this.setState({
-        value: [index],
-        status: null,
-      });
+      this.setState({ value: [index] });
       this.judge();
   }
 }
 
-export class OrderingQuizHolder extends QuizHolder {
+export class OrderingQuizHolder extends QuizHolder<number[]> {
   isCorrect() {
     const value = this.state.value;
-    if (!Array.isArray(value)) {
-      return false;
-    }
     const maxIndex = Math.max(...this.quiz.answers[0] as any);
     return _.some(
       this.quiz.answers,
@@ -186,7 +174,6 @@ export class OrderingQuizHolder extends QuizHolder {
   handleSelectEntry(index: number) {
     this.setState({
       value: [...this.state.value as any, index],
-      status: null,
     });
   }
 
@@ -196,7 +183,6 @@ export class OrderingQuizHolder extends QuizHolder {
     }
     this.setState({
       value: this.state.value.slice(0, -1),
-      status: null,
     });
   }
 

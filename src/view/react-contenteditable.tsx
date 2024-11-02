@@ -68,8 +68,9 @@ export default class ContentEditable extends React.Component<Props> {
         onKeyDown: this.props.onKeyDown || this.emitChange,
         suppressContentEditableWarning: true,
         contentEditable: this.props.disabled ? "false" : "plaintext-only",
-        onCompositionStart: () => { this.setState({...this.state, composing: true}); },
-        onCompositionEnd: (e: any) => {
+        onCompositionStart: () => { 
+          this.setState({...this.state, composing: true});
+        }, onCompositionEnd: (e: any) => {
           this.setState({...this.state, composing: false});
           // iOS Safari: 中文输入法联想词 start -> input -> end
           this.emitChange(e, true);
@@ -112,9 +113,9 @@ export default class ContentEditable extends React.Component<Props> {
 
     // Perhaps React (whose VDOM gets outdated because we often prevent
     // rerendering) did not update the DOM. So we update it manually now.
-    if (this.props.text !== strip(el.innerText)) {
-      el.innerText = this.displayText(this.props.text);
-    }
+    // if (this.props.text !== strip(el.innerText)) {
+    //   el.innerText = this.displayText(this.props.text);
+    // }
     this.lastText = this.props.text;
   }
 
@@ -163,6 +164,7 @@ export interface Props extends DivProps {
   style?: Object;
   placeholder?: string;
   innerRef?: React.RefObject<HTMLElement> | Function;
+  enterKeyHint: string | undefined;
   "data-pre": string,
   "data-post": string,
 }
