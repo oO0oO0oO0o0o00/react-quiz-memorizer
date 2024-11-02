@@ -1,5 +1,5 @@
 import React from "react";
-import { Group, Image, Center, Button, Menu, Progress, rem, Title } from "@mantine/core";
+import { Group, Image, Center, Button, Menu, Progress, rem, Title, useMantineTheme } from "@mantine/core";
 import { IconArrowLeft,
   IconDots,
   IconChevronLeft,
@@ -25,6 +25,7 @@ export default function QuizPage(
 ) {
   const article = fetchArticle();
   const elRefs = React.useRef<HTMLElement[]>([]);
+  const theme = useMantineTheme();
 
   // Shrink DOM array
   React.useEffect(() => {
@@ -117,8 +118,14 @@ export default function QuizPage(
             </Menu.Dropdown>
           </Menu>
         </Group>
-        <Progress size="xs" radius="sm"
-          value={article.state.progress * 100} />
+        <Progress.Root size="xs" radius="sm">
+          <Progress.Section
+            value={article.state.browsingProgress * 100}
+            color={theme.primaryColor}/>
+          <Progress.Section
+            value={(article.state.progress - article.state.browsingProgress) * 100}
+            color={theme.colors.oranges[1]}/>
+        </Progress.Root>
       </header>
       <main>
         <Center>{article.title}</Center>

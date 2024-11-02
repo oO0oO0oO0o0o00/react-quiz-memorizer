@@ -12,22 +12,29 @@ interface CollectionState {
   progressPage: number;
   page: number;
   quizIndexes: number[];
-  collection: Article[];
-  pageStates: (any[] | null)[];
+  collection: (Article | undefined)[];
+  pageStates: (QuizState<any>[] | undefined)[];
   pinyinMap: Record<string, string[]>;
 }
 
 type NullableCollectionState = CollectionState | null
 
-function progress(state: CollectionState): number {
+function progress(
+  state: CollectionState,
+  currentPage: number,
+  progressPage: number,
+): number {
   if (state.totalPage == 0) { return 0; }
   const pageWeight = 1 / state.totalPage;
-  const currentPageState = state.pageStates[state.page];
-  const pageProgress = (currentPageState && (currentPageState.length > 0)) ?
-      (currentPageState.reduce(
-          (s: number, e: any) => s + (e.status == QuizStatus.final ? 1 : 0), 0)
+  const currentPageState = state.pageStates[currentPage];
+  const pageProgress = (
+    progressPage == currentPage &&
+    currentPageState && (
+      currentPageState.length > 0)
+    ) ? (currentPageState.reduce(
+        (s: number, e) => s + +(e.status == QuizStatus.final), 0)
           / currentPageState.length) : 0;
-  return pageWeight * (state.progressPage + pageProgress);
+  return pageWeight * (currentPage + pageProgress);
 }
 
 export function useCollectionHolder(
@@ -102,17 +109,24 @@ class CollectionHolder {
 
   get articleHolder(): ArticleHolder | null {
     return U.apply(
-      this.state,
-      (state) => new ArticleHolder({
-        article: state.collection[state.page],
-        currentIndex: state.quizIndexes[state.page],
-        setCurrentIndex: (i: number) => this.setCurrentQuizIndex(i),
-        quizStates: state.pageStates[state.page],
-        setQuizStates: (s: QuizState) => this.setCurrentPageState(s),
-        pinyinMap: state.pinyinMap,
-        progress: progress(state),
-        loading: false, // this.loading,
-      }));
+      this.state, (state) => {
+        const article = state.collection[state.page];
+        const quizStates = state.pageStates[state.page];
+        if (article == null || quizStates == null) {
+          return null;
+        }
+        return new ArticleHolder({
+          article: article,
+          currentIndex: state.quizIndexes[state.page],
+          setCurrentIndex: (i: number) => this.setCurrentQuizIndex(i),
+          quizStates: quizStates,
+          setQuizStates: (s: QuizState<any>[]) => this.setCurrentPageState(s),
+          pinyinMap: state.pinyinMap,
+          progress: progress(state, state.progressPage, state.progressPage),
+          browsingProgress: progress(state, state.page, state.progressPage),
+          loading: false, // this.loading,
+      })
+    });
   }
 
   get score(): number {

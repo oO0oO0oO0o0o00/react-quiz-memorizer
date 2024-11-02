@@ -11,6 +11,7 @@ interface ArticleState {
   setQuizStates: (states: QuizState<any>[]) => void;
   pinyinMap: Record<string, string[]>;
   progress: number;
+  browsingProgress: number;
   loading: boolean;
 }
 
